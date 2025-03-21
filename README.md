@@ -23,16 +23,16 @@ Dataset Used
 
 **SQL Syntax for Removing Duplicates**
 
--- Identify and Insert Data
+-- Identify and Insert Data -- 
 SELECT * FROM layoffs_staging;
 INSERT INTO layoffs_staging SELECT * FROM layoffs;
 
--- Identify Duplicates
+-- Identify Duplicates -- 
 SELECT *, ROW_NUMBER() OVER(
  PARTITION BY company, industry, total_laid_off, percentage_laid_off, date) AS row_num
 FROM layoffs_staging;
 
--- Remove Duplicates Using CTE
+-- Remove Duplicates Using CTE -- 
 WITH duplicate_cte AS (
   SELECT *, ROW_NUMBER() OVER(
     PARTITION BY company, location, industry, total_laid_off, percentage_laid_off, date, stage, country, funds_raised_millions) AS row_num
@@ -48,16 +48,16 @@ DELETE FROM duplicate_cte WHERE row_num > 1;
 
  **SQL Syntax for Standardizing Data**
  
--- Trim Whitespaces
+-- Trim Whitespaces -- 
 UPDATE layoffs_staging2 SET company = TRIM(company);
 
--- Standardize Industry Names
+-- Standardize Industry Names -- 
 UPDATE layoffs_staging2 SET industry = 'Crypto' WHERE industry LIKE 'Crypto%';
 
--- Clean Country Names
+-- Clean Country Names -- 
 UPDATE layoffs_staging2 SET country = TRIM(TRAILING '.' FROM country) WHERE country LIKE 'United States%';
 
--- Convert Date Format
+-- Convert Date Format -- 
 UPDATE layoffs_staging2 SET date = STR_TO_DATE(date, '%m/%d/%Y');
 ALTER TABLE layoffs_staging2 MODIFY COLUMN date DATE;
 
@@ -68,13 +68,13 @@ ALTER TABLE layoffs_staging2 MODIFY COLUMN date DATE;
 
 **SQL Syntax for Handling NULL Values**
 
--- Identify NULL Values
+-- Identify NULL Values -- 
 SELECT * FROM layoffs_staging2 WHERE total_laid_off IS NULL AND percentage_laid_off IS NULL;
 
--- Update NULL Industry Values
+-- Update NULL Industry Values -- 
 UPDATE layoffs_staging2 SET industry = NULL WHERE industry = '';
 
--- Fill Missing Industry Data Based on Company
+-- Fill Missing Industry Data Based on Company -- 
 UPDATE layoffs_staging2 t1
 JOIN layoffs_staging2 t2 ON t1.company = t2.company
 SET t1.industry = t2.industry
@@ -86,10 +86,10 @@ WHERE t1.industry IS NULL AND t2.industry IS NOT NULL;
 
 **SQL Syntax for Removing Unnecessary Rows and Columns**
 
--- Delete NULL Rows
+-- Delete NULL Rows -- 
 DELETE FROM layoffs_staging2 WHERE total_laid_off IS NULL AND percentage_laid_off IS NULL;
 
--- Drop Unnecessary Columns
+-- Drop Unnecessary Columns -- 
 ALTER TABLE layoffs_staging2 DROP COLUMN row_num;
 
 Conclusion
